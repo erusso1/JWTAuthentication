@@ -13,6 +13,10 @@ let package = Package(
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
+        .package(url: "https://github.com/vapor/vapor.git", from: "3.0.0"),
+        .package(url: "https://github.com/vapor/jwt.git", from: "3.0.0"),
+        .package(url: "https://github.com/vapor/fluent.git", from: "3.0.0"),
+    
         // .package(url: /* package url */, from: "1.0.0"),
     ],
     targets: [
@@ -20,7 +24,7 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages which this package depends on.
         .target(
             name: "JWTAuthentication",
-            dependencies: []),
+            dependencies: ["Vapor", "JWT", "Fluent"]),
         .testTarget(
             name: "JWTAuthenticationTests",
             dependencies: ["JWTAuthentication"]),
