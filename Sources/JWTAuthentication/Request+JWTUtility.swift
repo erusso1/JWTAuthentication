@@ -11,12 +11,12 @@ extension Request {
         return token
     }
     
-    public func jwtAuthorizedUser<U: JWTTokenAuthenticatable>() throws -> Future<U> {
+    public func jwtAuthorized<U: JWTTokenAuthenticatable>(_ authenticatableType: U.Type) throws -> Future<U> {
                 
         let token = try jwtToken()
         
-        let userID = try U.identifier(inJWTToken: token)
+        let userID = try authenticatableType.identifier(inJWTToken: token)
         
-        return U.find(userID, on: self).unwrap(or: Abort(.unauthorized, reason: "Authorized user could not be found"))
+        return authenticatableType.find(userID, on: self).unwrap(or: Abort(.unauthorized, reason: "Authorized user could not be found"))
     }
 }
