@@ -1,6 +1,5 @@
 
 import JWT
-import Fluent
 
 struct JWTAccessTokenPayload<U: JWTTokenAuthenticatable>: JWTPayload {
     

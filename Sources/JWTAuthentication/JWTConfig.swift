@@ -2,16 +2,21 @@
 import JWT
 import Vapor
 
-enum JWTConfig {
+public struct JWTConfig {
     
-    static func signerKey() throws -> String {
-        guard let signerKey = Environment.get("JWT_SIGNER_KEY") else { throw Abort(.internalServerError, reason: "Authorization not configured properly, check JWTConfig.swift and ensure all values are provided for.") }
-        return signerKey
+    public static let defaultExpirationTime: TimeInterval = 1 * 60 * 60
+
+    public static func use(signerKey: String, tokenExpirationTime: TimeInterval = defaultExpirationTime) {
+        
+        self.signerKey = signerKey
+        self.expirationTime = tokenExpirationTime
     }
+        
+    static var signerKey = ""
     
     static let header = JWTHeader(alg: "HS256", typ: "JWT")
     
-    static func signer() throws -> JWTSigner { JWTSigner.hs256(key: try JWTConfig.signerKey()) }
+    static var signer: JWTSigner { .hs256(key: signerKey) }
     
-    static let expirationTime: TimeInterval = 100
+    static var expirationTime: TimeInterval = defaultExpirationTime
 }

@@ -11,9 +11,8 @@ extension JWTTokenAuthenticatable {
         
         let payload = try generateJWTPayload()
         let header = JWTConfig.header
-        let signer = try JWTConfig.signer()
         let jwt = JWT<JWTAccessTokenPayload>(header: header, payload: payload)
-        let tokenData = try signer.sign(jwt)
+        let tokenData = try JWTConfig.signer.sign(jwt)
         
         guard let token = String(data: tokenData, encoding: .utf8) else { throw JWTError.createJWT }
         
@@ -21,11 +20,9 @@ extension JWTTokenAuthenticatable {
     }
     
     public static func verifyJWTToken(_ token: String) throws {
-        
-        let signer = try JWTConfig.signer()
-        
+                
         do {
-            let _ = try JWT<JWTAccessTokenPayload<Self>>(from: token, verifiedUsing: signer)
+            let _ = try JWT<JWTAccessTokenPayload<Self>>(from: token, verifiedUsing: JWTConfig.signer)
         }
         catch {
             throw JWTError.verificationFailed
@@ -34,10 +31,8 @@ extension JWTTokenAuthenticatable {
     
     public static func identifier(inJWTToken token: String) throws -> ID {
         
-        let signer = try JWTConfig.signer()
-
         do {
-            let jwt = try JWT<JWTAccessTokenPayload<Self>>(from: token, verifiedUsing: signer)
+            let jwt = try JWT<JWTAccessTokenPayload<Self>>(from: token, verifiedUsing: JWTConfig.signer)
             return jwt.payload.identifier
         }
         catch {
@@ -47,11 +42,9 @@ extension JWTTokenAuthenticatable {
     
     public static func expiration(ofJWTToken token: String) throws -> Date {
         
-        let signer = try JWTConfig.signer()
-        let jwt = try JWT<JWTAccessTokenPayload<Self>>(from: token, verifiedUsing: signer)
+        let jwt = try JWT<JWTAccessTokenPayload<Self>>(from: token, verifiedUsing: JWTConfig.signer)
         return jwt.payload.expirationAt.value
     }
-    
 }
 
 extension JWTTokenAuthenticatable {
