@@ -6,7 +6,7 @@ extension Request {
     
     public func jwtToken() throws -> String {
         
-        guard let token = http.headers[.authorization].first else { throw Abort(.unauthorized, reason: "Authorization token not found in headers") }
+        guard let token = http.headers.bearerAuthorization?.token else { throw Abort(.unauthorized, reason: "Authorization token not found in headers") }
         
         return token
     }

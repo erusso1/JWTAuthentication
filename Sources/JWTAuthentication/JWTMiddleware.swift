@@ -2,6 +2,7 @@
 import JWT
 import Vapor
 
+/// Middleware that requires a valid JWT token string to be present in each Request's Bearer Authorization header.
 public final class JWTMiddleware<U: JWTTokenAuthenticatable>: Middleware {
     
     public func respond(to request: Request, chainingTo next: Responder) throws -> EventLoopFuture<Response> {
