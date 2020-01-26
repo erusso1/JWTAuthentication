@@ -30,7 +30,7 @@ extension JWTTokenAuthenticatable {
     public static func verifyJWTToken(_ token: String, signer: JWTSigner? = nil) throws {
                 
         do {
-            let _ = try JWT<JWTAccessTokenPayload<Self>>(from: token, verifiedUsing: (signer ?? JWTConfig.signer))
+            let _ = try JWT<JWTAccessTokenPayload<Self>>(from: token, verifiedUsing: signer ?? JWTConfig.signer)
         }
         catch {
             throw JWTError.verificationFailed
@@ -38,12 +38,15 @@ extension JWTTokenAuthenticatable {
     }
     
     /// Returns the `Identifier` of the receiving type found within the ecoded payload of the given `token` string.
-    /// - Parameter token: The JWT token string containg a value of `JWTAccessTokenPayload<T>`, where T is the type of the receiver.
+    /// - Parameters:
+    ///   - token: The JWT token string containg a value of
+    ///   `JWTAccessTokenPayload<T>`, where T is the type of the receiver.
+    ///   - signer: The signer used to generated the JWT token string. Passing `nil` will use the value set in `JWTConfig` by default.
     /// - Returns: The `Identifier` found within the encoded payload of the token string.
-    public static func identifier(inJWTToken token: String) throws -> ID {
+    public static func identifier(inJWTToken token: String, signer: JWTSigner? = nil) throws -> ID {
         
         do {
-            let jwt = try JWT<JWTAccessTokenPayload<Self>>(from: token, verifiedUsing: JWTConfig.signer)
+            let jwt = try JWT<JWTAccessTokenPayload<Self>>(from: token, verifiedUsing: signer ?? JWTConfig.signer)
             return jwt.payload.identifier
         }
         catch {
@@ -52,20 +55,24 @@ extension JWTTokenAuthenticatable {
     }
     
     /// Returns the expiration date of the given JWT `token` string, after which verifications will always fail.
-    /// - Parameter token: The JWT token string containing a value of `JWTAccessTokenPayload<T>`, where T is the type of the receiver.
+    /// - Parameters:
+    ///   - token: The JWT token string containing a value of `JWTAccessTokenPayload<T>`, where T is the type of the receiver.
+    ///   - signer: The signer used to generated the JWT token string. Passing `nil` will use the value set in `JWTConfig` by default.
     /// - Returns: The expiration date for the given `token`.
-    public static func expiration(ofJWTToken token: String) throws -> Date {
+    public static func expiration(ofJWTToken token: String, signer: JWTSigner? = nil) throws -> Date {
         
-        let jwt = try JWT<JWTAccessTokenPayload<Self>>(from: token, verifiedUsing: JWTConfig.signer)
+        let jwt = try JWT<JWTAccessTokenPayload<Self>>(from: token, verifiedUsing: signer ?? JWTConfig.signer)
         return jwt.payload.expirationAt.value
     }
     
     /// Returns a Boolean determining if the given JWT `token` string is expired or not.
-    /// - Parameter token: The JWT token string containing a value of `JWTAccessTokenPayload<T>`, where T is the type of the receiver.
+    /// - Parameters:
+    ///   - token: The JWT token string containing a value of `JWTAccessTokenPayload<T>`, where T is the type of the receiver.
+    ///   - signer: The signer used to generated the JWT token string. Passing `nil` will use the value set in `JWTConfig` by default.
     /// - Returns: `true` if the given `token` is expired.
-    public static func isJWTTokenExpired(token: String) throws -> Bool {
+    public static func isJWTTokenExpired(token: String, signer: JWTSigner? = nil) throws -> Bool {
         
-        Date() > (try expiration(ofJWTToken: token))
+        Date() > (try expiration(ofJWTToken: token, signer: signer))
     }
 }
 
