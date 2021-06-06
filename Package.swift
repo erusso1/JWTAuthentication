@@ -33,6 +33,9 @@ let package = Package(
             dependencies: ["Vapor", "JWT", "Fluent"]),
         .testTarget(
             name: "JWTAuthenticationTests",
-            dependencies: ["JWTAuthentication"]),
+            dependencies: [
+                .target(name: "JWTAuthentication"),
+                .product(name: "XCTVapor", package: "vapor")
+            ]),
     ]
 )

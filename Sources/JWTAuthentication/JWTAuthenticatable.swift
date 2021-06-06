@@ -31,7 +31,10 @@ public struct JWTHelper<U: JWTTokenAuthenticatable> {
         
         let identifier = try auth.requireID()
         
-        let payload = JWTAccessTokenPayload<U>(ttl: ttl ?? JWTConfig.expirationTime, identifier: identifier)
+        let payload = JWTAccessTokenPayload<U>(
+            ttl: ttl ?? req.application.jwt.config.expirationTTL,
+            issuer: req.application.jwt.config.issuer,
+            identifier: identifier)
         
         return try req.jwt.sign(payload)
     }

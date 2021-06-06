@@ -25,12 +25,13 @@ struct JWTAccessTokenPayload<U: JWTTokenAuthenticatable>: JWTPayload {
     var identifier: U.IDValue
     
     init(
-        ttl: TimeInterval = JWTConfig.expirationTime,
+        ttl: TimeInterval,
+        issuer: String,
         identifier: U.IDValue
     ) {
         
         let now = Date()
-        self.issuer = .init(value: JWTConfig.issuer)
+        self.issuer = .init(value: issuer)
         self.issuedAt = .init(value: now)
         self.expiration = .init(value: now.addingTimeInterval(ttl))
         self.identifier = identifier
