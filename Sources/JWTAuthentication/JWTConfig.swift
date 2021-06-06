@@ -5,15 +5,15 @@ import Vapor
 /// Contains JWT configuration parameters used as default values when generating and verifying JWT tokens.
 public struct JWTConfig {
 
-    static let defaultExpirationTime: TimeInterval = 24 * 60 * 60
+    private static let defaultExpirationTime: TimeInterval = 24 * 60 * 60
         
-    static var signerKey = ""
-    
-    static let header = JWTHeader(alg: "HS256", typ: "JWT")
-    
+    static var signerKey = Environment.get("JWT_SIGNER_KEY") ?? ""
+        
     static var signer: JWTSigner { .hs256(key: signerKey) }
     
     static var expirationTime: TimeInterval = defaultExpirationTime
+    
+    static var issuer: String = Environment.get("JWT_ISSUER") ?? ""
 }
 
 extension JWTConfig {

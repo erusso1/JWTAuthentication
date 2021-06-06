@@ -1,30 +1,43 @@
 
+import Foundation
 import JWT
 
 struct JWTAccessTokenPayload<U: JWTTokenAuthenticatable>: JWTPayload {
     
+    enum CodingKeys: String, CodingKey {
+        case issuer = "iss"
+        case issuedAt = "iat"
+        case expiration = "exp"
+        case identifier = "uuid"
+    }
+    
+    /// The issuer "iss" claim.
     var issuer: IssuerClaim
     
+    /// The issued at "iat" claim.
     var issuedAt: IssuedAtClaim
     
-    var expirationAt: ExpirationClaim
+    /// The expiration time "exp" claim.
+    var expiration: ExpirationClaim
     
-    var identifier: U.ID
+    /// The subject "sub" claim, containing the identifier of the associted
+    /// `JWTTokenAuthenticatable` type.
+    var identifier: U.IDValue
     
     init(
-        issuer: String = "HelloVapor",
-        issuedAt: Date = Date(),
-        expirationAt: Date = Date().addingTimeInterval(JWTConfig.expirationTime),
-        identifier: U.ID) {
-    
-        self.issuer = .init(value: issuer)
-        self.issuedAt = .init(value: issuedAt)
-        self.expirationAt = .init(value: expirationAt)
+        ttl: TimeInterval = JWTConfig.expirationTime,
+        identifier: U.IDValue
+    ) {
+        
+        let now = Date()
+        self.issuer = .init(value: JWTConfig.issuer)
+        self.issuedAt = .init(value: now)
+        self.expiration = .init(value: now.addingTimeInterval(ttl))
         self.identifier = identifier
     }
     
     func verify(using signer: JWTSigner) throws {
         
-        try self.expirationAt.verifyNotExpired()
+        try self.expiration.verifyNotExpired()
     }
 }

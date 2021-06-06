@@ -2,21 +2,12 @@
 import JWT
 import Vapor
 
-extension Request {
-    
-    public func jwtToken() throws -> String {
+extension Request.JWT {
+
+    public func authorized<U: JWTTokenAuthenticatable>(as authenticatableType: U.Type) throws -> EventLoopFuture<U> {
+                        
+        let payload = try verify(as: JWTAccessTokenPayload<U>.self)
         
-        guard let token = http.headers.bearerAuthorization?.token else { throw Abort(.unauthorized, reason: "Authorization token not found in headers") }
-        
-        return token
-    }
-    
-    public func jwtAuthorized<U: JWTTokenAuthenticatable>(_ authenticatableType: U.Type) throws -> Future<U> {
-                
-        let token = try jwtToken()
-        
-        let userID = try authenticatableType.identifier(inJWTToken: token)
-        
-        return authenticatableType.find(userID, on: self).unwrap(or: Abort(.unauthorized, reason: "Authorized user could not be found"))
+        return authenticatableType.find(payload.identifier, on: _request.db).unwrap(or: Abort(.unauthorized, reason: "Authorized user could not be found"))
     }
 }
