@@ -10,6 +10,8 @@ public protocol JWTTokenAuthenticatable: Model {
 
 extension JWTTokenAuthenticatable {
 
+    /// A helper used to perform JWT operations such a making a new
+    /// token using information provided by the receiver.
     public var jwt: JWTHelper<Self> { .init(self) }
 }
 
