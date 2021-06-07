@@ -7,10 +7,11 @@ final class JWTAuthenticationTests: XCTestCase {
    
     private var app: Application!
     
-    override func setUp() {
+    override func setUpWithError() throws {
         app = .init(.testing)
+        try configure(app)
     }
-    
+        
     override func tearDown() {
         app.shutdown()
     }
@@ -32,29 +33,7 @@ final class JWTAuthenticationTests: XCTestCase {
         XCTAssertEqual(app.jwt.config.expirationTTL, testTTL)
     }
 
-    func testAuthenticatable() {
-        
-        final class Planet: Model, JWTTokenAuthenticatable {
-            // Name of the table or collection.
-            static let schema = "planets"
-
-            // Unique identifier for this Planet.
-            @ID(key: .id)
-            var id: UUID?
-
-            // The Planet's name.
-            @Field(key: "name")
-            var name: String
-
-            // Creates a new, empty Planet.
-            init() { }
-
-            // Creates a new Planet with all properties set.
-            init(id: UUID? = nil, name: String) {
-                self.id = id
-                self.name = name
-            }
-        }
+    func testMakeToken() {
         
         let planet = Planet(name: "Mars")
         let req = Request(application: app, on: app.eventLoopGroup.next())
@@ -81,7 +60,53 @@ final class JWTAuthenticationTests: XCTestCase {
         )
     }
     
+    func testTokenClaims() throws {
+        
+        app.jwt.config.issuer = "test_issuer"
+        app.jwt.config.signer = .hs256(key: Environment.get("JWT_SIGNATURE")!)
+
+        let planet = Planet(name: "Mars")
+        planet.id = .init(uuidString: "d45009dd-e45a-493e-b432-805235cf7d27")
+        let req = Request(application: app, on: app.eventLoopGroup.next())
+        let ttl: TimeInterval = 3600
+        let token = try planet.jwt.makeToken(on: req, ttl: ttl)
+        
+        let payload = try req.jwt.verify(token, as: JWTAccessTokenPayload<Planet>.self)
+        
+        XCTAssertEqual(Int(Date(timeIntervalSinceNow: ttl).timeIntervalSince1970), Int(payload.expiration.value.timeIntervalSince1970))
+        XCTAssertEqual(payload.issuer.value, app.jwt.config.issuer)
+        XCTAssertEqual(payload.identifier, planet.id)
+    }
+    
+    func testUnauthorizedRequest() throws {
+        
+        try app.test(.GET, "me") { res in
+            XCTAssertEqual(res.status, .unauthorized)
+        }
+    }
+    
+    func testAuthorizedRequest() throws {
+        
+        app.jwt.config.signer = .hs256(key: Environment.get("JWT_SIGNATURE")!)
+        
+        let planet = Planet(name: "Mars")
+        planet.id = .init(uuidString: "d45009dd-e45a-493e-b432-805235cf7d27")
+        let req = Request(application: app, on: app.eventLoopGroup.next())
+        let token = try planet.jwt.makeToken(on: req)
+        
+        try app
+            .test(.GET, "me") { res in
+                XCTAssertEqual(res.status, .unauthorized)
+            }
+            .test(.GET, "me", headers: ["Authorization": "Bearer \(token)"]) { res in
+                XCTAssertEqual(res.status, .ok)
+                XCTAssertEqual(res.body.string, "Hello, world!")
+            }
+    }
+    
     static var allTests = [
         ("testConfig", testConfig),
+        ("testMakeToken", testMakeToken),
+        ("testTokenClaims", testTokenClaims),
     ]
 }

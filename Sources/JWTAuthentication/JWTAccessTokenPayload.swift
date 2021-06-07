@@ -1,5 +1,5 @@
 
-import Foundation
+import Vapor
 import JWT
 
 struct JWTAccessTokenPayload<U: JWTTokenAuthenticatable>: JWTPayload {
@@ -42,3 +42,5 @@ struct JWTAccessTokenPayload<U: JWTTokenAuthenticatable>: JWTPayload {
         try self.expiration.verifyNotExpired()
     }
 }
+
+extension JWTAccessTokenPayload: Authenticatable { }

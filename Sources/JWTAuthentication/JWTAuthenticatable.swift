@@ -13,6 +13,36 @@ extension JWTTokenAuthenticatable {
     /// A helper used to perform JWT operations such a making a new
     /// token using information provided by the receiver.
     public var jwt: JWTHelper<Self> { .init(self) }
+    
+    /// Convenience method to create an `Authenticator` directly using
+    /// a `JWTTokenAuthenticatable` model.
+    ///
+    /// For example, a  User model which conforms to `JWTTokenAuthenticatable`
+    /// can be used in conjunction with Vapor's `Application` middleware as shown
+    /// below:
+    ///
+    ///     let auth = app.grouped(User.jwtAuthenticator(), User.jwtGuardMiddleware())
+    ///
+    /// - Returns: A new `Authenticator` instance which attempts to verify the JWT token
+    /// found within request headers with respect to the receiver.
+    public static func jwtAuthenticator() -> Authenticator {
+        JWTAccessTokenPayload<Self>.authenticator()
+    }
+    
+    /// Convenience method to create a `Middleware` instance directly using
+    /// a `JWTTokenAuthenticatable` model.
+    ///
+    /// For example, a  User model which conforms to `JWTTokenAuthenticatable`
+    /// can be used in conjunction with Vapor's `Application` middleware as shown
+    /// below:
+    ///
+    ///     let auth = app.grouped(User.jwtAuthenticator(), User.jwtGuardMiddleware())
+    ///
+    /// - Returns: A new `Middleware` instance which requires that a previous
+    /// `Middleware` has verified the JWT token associated with the receiver.
+    public static func jwtGuardMiddleware() -> Middleware {
+        JWTAccessTokenPayload<Self>.guardMiddleware()
+    }
 }
 
 public struct JWTHelper<U: JWTTokenAuthenticatable> {
