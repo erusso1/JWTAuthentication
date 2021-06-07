@@ -16,4 +16,10 @@ func routes(_ app: Application) throws {
     auth.get("me") { req -> String in
         return "Hello, world!"
     }
+    
+    auth.get("me", "planet") { req -> EventLoopFuture<String> in
+        try req.jwt
+            .authenticated(as: Planet.self)
+            .map { "I'd like to go to \($0.name)" }
+    }
 }

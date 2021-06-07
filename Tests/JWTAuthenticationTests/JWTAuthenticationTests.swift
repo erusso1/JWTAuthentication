@@ -103,6 +103,22 @@ final class JWTAuthenticationTests: XCTestCase {
                 XCTAssertEqual(res.body.string, "Hello, world!")
             }
     }
+    // TODO: Include this test when test-only dependencies are avilable
+    /*
+    func testUnableToFindAuthenticated() throws {
+        
+        app.jwt.config.signer = .hs256(key: Environment.get("JWT_SIGNATURE")!)
+        
+        let planet = Planet(name: "Mars")
+        planet.id = .init(uuidString: "d45009dd-e45a-493e-b432-805235cf7d27")
+        let req = Request(application: app, on: app.eventLoopGroup.next())
+        let token = try planet.jwt.makeToken(on: req)
+        
+        try app.test(.GET, "me/planet", headers: ["Authorization": "Bearer \(token)"]) { res in
+            XCTAssertEqual(res.status, .unauthorized)
+        }
+    }
+    */
     
     static var allTests = [
         ("testConfig", testConfig),
