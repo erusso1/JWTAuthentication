@@ -108,5 +108,7 @@ final class JWTAuthenticationTests: XCTestCase {
         ("testConfig", testConfig),
         ("testMakeToken", testMakeToken),
         ("testTokenClaims", testTokenClaims),
+        ("testUnauthorizedRequest", testUnauthorizedRequest),
+        ("testAuthorizedRequest", testAuthorizedRequest),
     ]
 }
